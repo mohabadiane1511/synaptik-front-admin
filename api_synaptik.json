@@ -1,0 +1,2161 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Synaptik API",
+      "description": "API pour l'application Synaptik",
+      "version": "1.0.0"
+    },
+    "paths": {
+      "/api/auth/token": {
+        "post": {
+          "tags": [
+            "auth"
+          ],
+          "summary": "Login Super Admin",
+          "description": "Route d'authentification pour les super admins.",
+          "operationId": "login_super_admin_api_auth_token_post",
+          "requestBody": {
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "$ref": "#/components/schemas/Body_login_super_admin_api_auth_token_post"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Token"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/tenant/token": {
+        "post": {
+          "tags": [
+            "auth"
+          ],
+          "summary": "Login Tenant User",
+          "description": "Route d'authentification pour les utilisateurs tenant.",
+          "operationId": "login_tenant_user_api_auth_tenant_token_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantLoginRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Token"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/refresh": {
+        "post": {
+          "tags": [
+            "auth"
+          ],
+          "summary": "Refresh Token",
+          "description": "Rafraîchit le token d'accès en utilisant le refresh token.",
+          "operationId": "refresh_token_api_auth_refresh_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Token"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/users/": {
+        "post": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Create User",
+          "description": "Crée un nouvel utilisateur (admin uniquement).",
+          "operationId": "create_user_api_users__post",
+          "security": [
+            {
+              "Tenant User Auth": [
+                "admin"
+              ]
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Get Users",
+          "description": "Liste les utilisateurs du tenant.",
+          "operationId": "get_users_api_users__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "title": "Response Get Users Api Users  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/users/{user_id}": {
+        "get": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Get User",
+          "description": "Récupère les détails d'un utilisateur.",
+          "operationId": "get_user_api_users__user_id__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "User Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Update User",
+          "description": "Met à jour un utilisateur.",
+          "operationId": "update_user_api_users__user_id__put",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "User Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserUpdate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "users"
+          ],
+          "summary": "Delete User",
+          "description": "Supprime un utilisateur (admin uniquement).",
+          "operationId": "delete_user_api_users__user_id__delete",
+          "security": [
+            {
+              "Tenant User Auth": [
+                "admin"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "User Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/tenants/": {
+        "post": {
+          "tags": [
+            "tenants"
+          ],
+          "summary": "Create Tenant",
+          "description": "Crée un nouveau tenant avec son administrateur (super admin uniquement).",
+          "operationId": "create_tenant_api_tenants__post",
+          "security": [
+            {
+              "Tenant User Auth": [
+                "super_admin"
+              ]
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TenantResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "tenants"
+          ],
+          "summary": "Get Tenants",
+          "description": "Liste tous les tenants (super admin uniquement).",
+          "operationId": "get_tenants_api_tenants__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/TenantResponse"
+                    },
+                    "title": "Response Get Tenants Api Tenants  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/tenants/{tenant_id}": {
+        "get": {
+          "tags": [
+            "tenants"
+          ],
+          "summary": "Get Tenant",
+          "description": "Récupère les détails d'un tenant.",
+          "operationId": "get_tenant_api_tenants__tenant_id__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "tenant_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Tenant Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TenantResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "tenants"
+          ],
+          "summary": "Update Tenant",
+          "description": "Met à jour un tenant (super admin uniquement).",
+          "operationId": "update_tenant_api_tenants__tenant_id__put",
+          "security": [
+            {
+              "Tenant User Auth": [
+                "super_admin"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "tenant_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Tenant Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantUpdate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TenantResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "tenants"
+          ],
+          "summary": "Delete Tenant",
+          "description": "Supprime un tenant (super admin uniquement).",
+          "operationId": "delete_tenant_api_tenants__tenant_id__delete",
+          "security": [
+            {
+              "Tenant User Auth": [
+                "super_admin"
+              ]
+            }
+          ],
+          "parameters": [
+            {
+              "name": "tenant_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Tenant Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/documents/": {
+        "post": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "Upload Document",
+          "description": "Upload et traitement asynchrone d'un document.",
+          "operationId": "upload_document_api_documents__post",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "X-Tenant-ID",
+              "in": "header",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "description": "ID du tenant (requis pour les super admins)",
+                "title": "X-Tenant-Id"
+              },
+              "description": "ID du tenant (requis pour les super admins)"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "$ref": "#/components/schemas/Body_upload_document_api_documents__post"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DocumentResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "List Documents",
+          "description": "Liste les documents du tenant.",
+          "operationId": "list_documents_api_documents__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "X-Tenant-ID",
+              "in": "header",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "description": "ID du tenant (requis pour les super admins)",
+                "title": "X-Tenant-Id"
+              },
+              "description": "ID du tenant (requis pour les super admins)"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DocumentResponse"
+                    },
+                    "title": "Response List Documents Api Documents  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/documents/{document_id}": {
+        "get": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "Get Document",
+          "description": "Récupère les détails d'un document.",
+          "operationId": "get_document_api_documents__document_id__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "document_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Document Id"
+              }
+            },
+            {
+              "name": "X-Tenant-ID",
+              "in": "header",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "description": "ID du tenant (requis pour les super admins)",
+                "title": "X-Tenant-Id"
+              },
+              "description": "ID du tenant (requis pour les super admins)"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DocumentResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "Delete Document",
+          "description": "Supprime un document.",
+          "operationId": "delete_document_api_documents__document_id__delete",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "document_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Document Id"
+              }
+            },
+            {
+              "name": "X-Tenant-ID",
+              "in": "header",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "description": "ID du tenant (requis pour les super admins)",
+                "title": "X-Tenant-Id"
+              },
+              "description": "ID du tenant (requis pour les super admins)"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/documents/{document_id}/status": {
+        "get": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "Get Document Status",
+          "description": "Récupère le statut de traitement d'un document.",
+          "operationId": "get_document_status_api_documents__document_id__status_get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "document_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Document Id"
+              }
+            },
+            {
+              "name": "X-Tenant-ID",
+              "in": "header",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "description": "ID du tenant (requis pour les super admins)",
+                "title": "X-Tenant-Id"
+              },
+              "description": "ID du tenant (requis pour les super admins)"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DocumentStatusResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/conversations/": {
+        "get": {
+          "tags": [
+            "conversations"
+          ],
+          "summary": "List Conversations",
+          "description": "Liste toutes les conversations de l'utilisateur",
+          "operationId": "list_conversations_api_conversations__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/ConversationResponse"
+                    },
+                    "type": "array",
+                    "title": "Response List Conversations Api Conversations  Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ]
+        },
+        "post": {
+          "tags": [
+            "conversations"
+          ],
+          "summary": "Create Conversation",
+          "description": "Crée une nouvelle conversation",
+          "operationId": "create_conversation_api_conversations__post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationCreate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ConversationResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ]
+        }
+      },
+      "/api/conversations/{conversation_id}": {
+        "get": {
+          "tags": [
+            "conversations"
+          ],
+          "summary": "Get Conversation",
+          "description": "Récupère les détails d'une conversation",
+          "operationId": "get_conversation_api_conversations__conversation_id__get",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "conversation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Conversation Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "conversations"
+          ],
+          "summary": "Update Conversation",
+          "description": "Modifie le titre d'une conversation",
+          "operationId": "update_conversation_api_conversations__conversation_id__put",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "conversation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Conversation Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationBase"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ConversationResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "conversations"
+          ],
+          "summary": "Delete Conversation",
+          "description": "Supprime une conversation",
+          "operationId": "delete_conversation_api_conversations__conversation_id__delete",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "conversation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Conversation Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/conversations/{conversation_id}/messages": {
+        "post": {
+          "tags": [
+            "conversations"
+          ],
+          "summary": "Add Message",
+          "description": "Ajoute un message à une conversation et obtient une réponse de l'IA",
+          "operationId": "add_message_api_conversations__conversation_id__messages_post",
+          "security": [
+            {
+              "Tenant User Auth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "conversation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Conversation Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/": {
+        "get": {
+          "summary": "Root",
+          "operationId": "root__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "AdminCreate": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "title": "Email"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            },
+            "first_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "First Name"
+            },
+            "last_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Name"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "password"
+          ],
+          "title": "AdminCreate"
+        },
+        "Body_login_super_admin_api_auth_token_post": {
+          "properties": {
+            "grant_type": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^password$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grant Type"
+            },
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            },
+            "scope": {
+              "type": "string",
+              "title": "Scope",
+              "default": ""
+            },
+            "client_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Id"
+            },
+            "client_secret": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Secret"
+            }
+          },
+          "type": "object",
+          "required": [
+            "username",
+            "password"
+          ],
+          "title": "Body_login_super_admin_api_auth_token_post"
+        },
+        "Body_upload_document_api_documents__post": {
+          "properties": {
+            "file": {
+              "type": "string",
+              "format": "binary",
+              "title": "File"
+            }
+          },
+          "type": "object",
+          "required": [
+            "file"
+          ],
+          "title": "Body_upload_document_api_documents__post"
+        },
+        "ConversationBase": {
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title"
+            }
+          },
+          "type": "object",
+          "required": [
+            "title"
+          ],
+          "title": "ConversationBase"
+        },
+        "ConversationCreate": {
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title"
+            }
+          },
+          "type": "object",
+          "required": [
+            "title"
+          ],
+          "title": "ConversationCreate"
+        },
+        "ConversationResponse": {
+          "properties": {
+            "title": {
+              "type": "string",
+              "title": "Title"
+            },
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "user_id": {
+              "type": "integer",
+              "title": "User Id"
+            },
+            "tenant_id": {
+              "type": "integer",
+              "title": "Tenant Id"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "messages": {
+              "items": {
+                "$ref": "#/components/schemas/MessageResponse"
+              },
+              "type": "array",
+              "title": "Messages",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "title",
+            "id",
+            "user_id",
+            "tenant_id",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "ConversationResponse"
+        },
+        "DocumentResponse": {
+          "properties": {
+            "filename": {
+              "type": "string",
+              "title": "Filename"
+            },
+            "content_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Content Type"
+            },
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "tenant_id": {
+              "type": "integer",
+              "title": "Tenant Id"
+            },
+            "file_path": {
+              "type": "string",
+              "title": "File Path"
+            },
+            "status": {
+              "$ref": "#/components/schemas/DocumentStatus"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "filename",
+            "id",
+            "tenant_id",
+            "file_path",
+            "status",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "DocumentResponse"
+        },
+        "DocumentStatus": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "ERROR"
+          ],
+          "title": "DocumentStatus"
+        },
+        "DocumentStatusResponse": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "status": {
+              "$ref": "#/components/schemas/DocumentStatus"
+            },
+            "message": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Message"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "status"
+          ],
+          "title": "DocumentStatusResponse"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "MessageCreate": {
+          "properties": {
+            "content": {
+              "type": "string",
+              "title": "Content"
+            }
+          },
+          "type": "object",
+          "required": [
+            "content"
+          ],
+          "title": "MessageCreate"
+        },
+        "MessageResponse": {
+          "properties": {
+            "content": {
+              "type": "string",
+              "title": "Content"
+            },
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "conversation_id": {
+              "type": "integer",
+              "title": "Conversation Id"
+            },
+            "role": {
+              "$ref": "#/components/schemas/MessageRole"
+            },
+            "sources": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/Source"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sources"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "content",
+            "id",
+            "conversation_id",
+            "role",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "MessageResponse"
+        },
+        "MessageRole": {
+          "type": "string",
+          "enum": [
+            "USER",
+            "ASSISTANT"
+          ],
+          "title": "MessageRole"
+        },
+        "RefreshTokenRequest": {
+          "properties": {
+            "refresh_token": {
+              "type": "string",
+              "title": "Refresh Token"
+            }
+          },
+          "type": "object",
+          "required": [
+            "refresh_token"
+          ],
+          "title": "RefreshTokenRequest",
+          "description": "Requête pour rafraîchir le token"
+        },
+        "Source": {
+          "properties": {
+            "document_name": {
+              "type": "string",
+              "title": "Document Name"
+            },
+            "relevance_score": {
+              "type": "number",
+              "title": "Relevance Score"
+            },
+            "excerpt": {
+              "type": "string",
+              "title": "Excerpt"
+            }
+          },
+          "type": "object",
+          "required": [
+            "document_name",
+            "relevance_score",
+            "excerpt"
+          ],
+          "title": "Source"
+        },
+        "TenantCreate": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "slug": {
+              "type": "string",
+              "title": "Slug"
+            },
+            "is_active": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active",
+              "default": true
+            },
+            "admin": {
+              "$ref": "#/components/schemas/AdminCreate"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "slug",
+            "admin"
+          ],
+          "title": "TenantCreate"
+        },
+        "TenantLoginRequest": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            },
+            "tenant_slug": {
+              "type": "string",
+              "title": "Tenant Slug"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "password",
+            "tenant_slug"
+          ],
+          "title": "TenantLoginRequest",
+          "description": "Schéma pour l'authentification d'un utilisateur tenant"
+        },
+        "TenantResponse": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "slug": {
+              "type": "string",
+              "title": "Slug"
+            },
+            "is_active": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active",
+              "default": true
+            },
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "slug",
+            "id",
+            "created_at"
+          ],
+          "title": "TenantResponse"
+        },
+        "TenantUpdate": {
+          "properties": {
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            },
+            "slug": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Slug"
+            },
+            "is_active": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active"
+            },
+            "max_users": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Users"
+            },
+            "embedding_model": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Embedding Model"
+            }
+          },
+          "type": "object",
+          "title": "TenantUpdate"
+        },
+        "Token": {
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "title": "Access Token"
+            },
+            "refresh_token": {
+              "type": "string",
+              "title": "Refresh Token"
+            },
+            "token_type": {
+              "type": "string",
+              "title": "Token Type"
+            },
+            "user_role": {
+              "$ref": "#/components/schemas/UserRole"
+            },
+            "tenant_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            },
+            "tenant_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Name"
+            },
+            "tenant_slug": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Slug"
+            },
+            "user_id": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          },
+          "type": "object",
+          "required": [
+            "access_token",
+            "refresh_token",
+            "token_type",
+            "user_role",
+            "user_id"
+          ],
+          "title": "Token",
+          "description": "Réponse de l'authentification"
+        },
+        "UserCreate": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "first_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "First Name"
+            },
+            "last_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Name"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active",
+              "default": true
+            },
+            "role": {
+              "$ref": "#/components/schemas/UserRole",
+              "default": "USER"
+            },
+            "tenant_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "password"
+          ],
+          "title": "UserCreate"
+        },
+        "UserResponse": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "first_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "First Name"
+            },
+            "last_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Name"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active",
+              "default": true
+            },
+            "role": {
+              "$ref": "#/components/schemas/UserRole",
+              "default": "USER"
+            },
+            "tenant_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            },
+            "id": {
+              "type": "integer",
+              "title": "Id"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "id",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "UserResponse"
+        },
+        "UserRole": {
+          "type": "string",
+          "enum": [
+            "SUPER_ADMIN",
+            "ADMIN",
+            "USER"
+          ],
+          "title": "UserRole"
+        },
+        "UserUpdate": {
+          "properties": {
+            "email": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "email"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Email"
+            },
+            "first_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "First Name"
+            },
+            "last_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last Name"
+            },
+            "password": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Password"
+            },
+            "is_active": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active"
+            },
+            "role": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/UserRole"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "tenant_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          },
+          "type": "object",
+          "title": "UserUpdate"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      },
+      "securitySchemes": {
+        "Tenant User Auth": {
+          "type": "oauth2",
+          "description": "Authentification utilisateur tenant (email, password, tenant_slug requis)",
+          "flows": {
+            "password": {
+              "scopes": {
+  
+              },
+              "tokenUrl": "api/auth/tenant/token"
+            }
+          }
+        }
+      }
+    }
+  }
