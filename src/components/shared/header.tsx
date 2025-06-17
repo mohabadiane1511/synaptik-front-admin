@@ -10,14 +10,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { Bell, Search, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { authService } from "@/lib/auth";
 
 export function Header() {
-    const router = useRouter();
-
     const handleLogout = () => {
-        // TODO: Implémenter la déconnexion
-        router.push("/auth/login");
+        authService.logout();
     };
 
     return (
