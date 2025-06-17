@@ -3,18 +3,25 @@ import axiosInstance from "@/lib/axios";
 
 export async function GET(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
-        const skip = searchParams.get("skip") || "0";
-        const limit = searchParams.get("limit") || "10";
-
+        // Récupérer tous les documents triés par date de création décroissante
         const response = await axiosInstance.get(
-            `/api/documents/?skip=${skip}&limit=${limit}`,
+            `/api/documents/?sort=-created_at`,
             {
                 headers: Object.fromEntries(request.headers)
             }
         );
 
-        return NextResponse.json(response.data);
+        console.log("Route API - Réponse du backend:", response.data);
+
+        // S'assurer que la réponse est dans le bon format
+        const formattedResponse = {
+            items: Array.isArray(response.data) ? response.data : (response.data.items || []),
+            total: Array.isArray(response.data) ? response.data.length : (response.data.total || 0)
+        };
+
+        console.log("Route API - Réponse formatée:", formattedResponse);
+
+        return NextResponse.json(formattedResponse);
     } catch (error: any) {
         console.error("Erreur lors de la récupération des documents:", error.response?.data || error.message);
         return NextResponse.json(
