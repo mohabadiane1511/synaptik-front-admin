@@ -3,7 +3,7 @@ import { DocumentResponse } from "@/types/documents";
 import { documentsService } from "@/lib/documents";
 import { DocumentStatusBadge } from "@/components/ui/document-status-badge";
 import { useDocumentStatus } from "@/hooks/useDocumentStatus";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { parseISO, format, addHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { FileIcon, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,11 @@ interface DocumentListProps {
 export function DocumentList({ onDocumentDeleted, onRefresh }: DocumentListProps) {
     const [documents, setDocuments] = useState<DocumentResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Trier les documents du plus récent au plus ancien en utilisant parseISO pour une comparaison correcte
+    const sortedDocuments = [...documents].sort((a, b) =>
+        parseISO(b.created_at).getTime() - parseISO(a.created_at).getTime()
+    );
 
     const loadDocuments = useCallback(async () => {
         setIsLoading(true);
@@ -88,7 +93,7 @@ export function DocumentList({ onDocumentDeleted, onRefresh }: DocumentListProps
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {documents.map((document) => (
+                {sortedDocuments.map((document) => (
                     <DocumentRow
                         key={document.id}
                         document={document}
@@ -109,13 +114,12 @@ function DocumentRow({ document, onDelete }: DocumentRowProps) {
     const { status } = useDocumentStatus(document.id);
     const currentStatus = status || document.status;
 
+    // Formater la date en local
     const formatDate = (dateString: string) => {
         const date = parseISO(dateString);
-        return formatDistanceToNow(date, {
-            addSuffix: true,
-            locale: fr,
-            includeSeconds: true
-        });
+        // Ajouter 2 heures car le backend envoie en UTC
+        const localDate = addHours(date, 2);
+        return format(localDate, "dd/MM/yyyy HH:mm", { locale: fr });
     };
 
     return (
