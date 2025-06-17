@@ -1,40 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { authService } from "@/lib/auth";
-import { LoginRequest } from "@/types/auth";
-
-const loginSchema = z.object({
-    email: z.string().email("Email invalide"),
-    password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-    tenant_slug: z.string().min(1, "Le slug du tenant est requis"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+import { LoginForm, LoginRequest, loginSchema } from "@/types/auth";
 
 export default function LoginPage() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const redirectPath = searchParams.get("redirect") || "/dashboard";
 
@@ -49,102 +22,100 @@ export default function LoginPage() {
 
     const onSubmit = async (data: LoginForm) => {
         try {
-            console.log("[Login] Tentative de connexion avec:", data.email);
             const token = await authService.login(data as LoginRequest);
-            console.log("[Login] Connexion réussie, role:", token.user_role);
 
             if (token.user_role !== "ADMIN") {
-                console.log("[Login] Accès refusé - utilisateur non admin");
                 toast.error("Accès réservé aux administrateurs");
                 return;
             }
 
             toast.success("Connexion réussie");
-            console.log("[Login] Redirection vers:", redirectPath);
-
-            // Attendre un court instant pour s'assurer que le cookie est bien enregistré
-            setTimeout(() => {
-                console.log("[Login] Exécution de la redirection");
-                window.location.href = redirectPath;
-            }, 500);
+            window.location.href = redirectPath;
         } catch (error: any) {
-            console.error("Erreur de connexion:", error);
+            console.error("[Login] Erreur:", error);
 
             if (error.response?.status === 401) {
                 toast.error("Identifiants invalides");
             } else if (error.response?.status === 404) {
                 toast.error("Tenant introuvable");
             } else {
-                toast.error("Une erreur est survenue");
+                toast.error("Une erreur est survenue lors de la connexion");
             }
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-            <Card className="w-[400px]">
-                <CardHeader>
-                    <CardTitle>Connexion</CardTitle>
-                    <CardDescription>
-                        Connectez-vous à votre espace administrateur Synaptik
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="tenant_slug"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Slug du tenant</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="mon-entreprise"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+        <div className="flex min-h-screen items-center justify-center">
+            <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-lg">
+                <div className="text-center">
+                    <h2 className="text-3xl font-bold">Connexion</h2>
+                    <p className="mt-2 text-sm text-gray-600">
+                        Accédez à votre espace administrateur
+                    </p>
+                </div>
+
+                <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="tenant_slug" className="block text-sm font-medium">
+                                Tenant
+                            </label>
+                            <input
+                                {...form.register("tenant_slug")}
+                                type="text"
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                                placeholder="tenant-slug"
                             />
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Email</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="email"
-                                                placeholder="admin@example.com"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                            {form.formState.errors.tenant_slug && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {form.formState.errors.tenant_slug.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium">
+                                Email
+                            </label>
+                            <input
+                                {...form.register("email")}
+                                type="email"
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                                placeholder="vous@exemple.com"
                             />
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Mot de passe</FormLabel>
-                                        <FormControl>
-                                            <Input type="password" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                            {form.formState.errors.email && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {form.formState.errors.email.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium">
+                                Mot de passe
+                            </label>
+                            <input
+                                {...form.register("password")}
+                                type="password"
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                             />
-                            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                                {form.formState.isSubmitting ? "Connexion..." : "Se connecter"}
-                            </Button>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
+                            {form.formState.errors.password && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {form.formState.errors.password.message}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={form.formState.isSubmitting}
+                        className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                    >
+                        {form.formState.isSubmitting ? "Connexion..." : "Se connecter"}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 } 

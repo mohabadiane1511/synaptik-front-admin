@@ -1,14 +1,14 @@
 import axios from "axios";
-import { LoginRequest, Token } from "@/types/auth";
-import { tokenService } from "./token";
+import { LoginRequest, Token, TokenData } from "@/types/auth";
+import { createSession, deleteSession, getSession } from "./session";
 
 // Configurer axios pour utiliser automatiquement le token
 axios.interceptors.request.use(async (config) => {
-  const token = await tokenService.getValidToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token.access_token}`;
-    if (token.tenant_id) {
-      config.headers["X-Tenant-ID"] = token.tenant_id.toString();
+  const session = await getSession();
+  if (session) {
+    config.headers.Authorization = `Bearer ${session.access_token}`;
+    if (session.tenant_id) {
+      config.headers["X-Tenant-ID"] = session.tenant_id.toString();
     }
   }
   return config;
@@ -20,13 +20,39 @@ axios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/')) {
       originalRequest._retry = true;
 
-      const token = await tokenService.refreshToken();
-      if (token) {
-        originalRequest.headers.Authorization = `Bearer ${token.access_token}`;
+      try {
+        const session = await getSession();
+        if (!session) {
+          throw new Error('No session found');
+        }
+
+        // Tenter de rafraîchir le token
+        const response = await axios.post("/api/auth/refresh", {
+          refresh_token: session.refresh_token
+        });
+
+        const newToken = response.data;
+        const tokenData: TokenData = {
+          ...newToken,
+          expires_at: Date.now() + ((newToken.expires_in || 3600) * 1000),
+          refresh_token_expires_at: Date.now() + ((newToken.refresh_token_expires_in || 86400) * 1000)
+        };
+
+        await createSession(tokenData);
+        
+        // Réessayer la requête originale avec le nouveau token
+        originalRequest.headers.Authorization = `Bearer ${tokenData.access_token}`;
         return axios(originalRequest);
+      } catch (refreshError) {
+        console.error("[Auth] Erreur refresh token:", refreshError);
+        await deleteSession();
+        if (typeof window !== 'undefined') {
+          window.location.href = "/auth/login";
+        }
+        return Promise.reject(refreshError);
       }
     }
 
@@ -40,35 +66,37 @@ export const authService = {
       "/api/auth/tenant/token",
       data
     );
-    console.log("[AuthService] Réponse du backend:", response.data);
+    
     const token = response.data;
     
     if (token.user_role !== "ADMIN") {
       throw new Error("Accès non autorisé");
     }
 
-    // Définir des valeurs par défaut pour l'expiration
-    const tokenWithExpiry: Token = {
+    const tokenData: TokenData = {
       ...token,
-      expires_in: 3600, // 1 heure par défaut
-      refresh_token_expires_in: 86400 // 24 heures par défaut
+      expires_in: token.expires_in || 3600,
+      refresh_token_expires_in: token.refresh_token_expires_in || 86400,
+      expires_at: Date.now() + ((token.expires_in || 3600) * 1000),
+      refresh_token_expires_at: Date.now() + ((token.refresh_token_expires_in || 86400) * 1000)
     };
 
-    tokenService.saveToken(tokenWithExpiry);
-    return tokenWithExpiry;
+    await createSession(tokenData);
+
+    return token;
   },
 
-  getToken() {
-    return tokenService.getToken();
+  async getToken() {
+    return getSession();
   },
 
-  isAuthenticated(): boolean {
-    const token = tokenService.getToken();
-    return !!token && token.user_role === "ADMIN" && !tokenService.isTokenExpired(token);
+  async isAuthenticated(): Promise<boolean> {
+    const session = await getSession();
+    return !!session && session.user_role === "ADMIN" && Date.now() < session.expires_at;
   },
 
   async logout() {
-    tokenService.removeToken();
+    await deleteSession();
     window.location.href = "/auth/login";
   }
 }; 

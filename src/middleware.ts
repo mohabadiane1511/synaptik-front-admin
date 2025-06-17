@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { TokenData } from "./types/auth";
+import { isTokenExpired } from "./lib/session";
 
 // Routes qui ne nécessitent pas d'authentification
 const publicRoutes = [
@@ -9,45 +10,42 @@ const publicRoutes = [
   "/api/auth/refresh"
 ];
 
+function redirectToLogin(request: NextRequest) {
+  const url = request.nextUrl.clone()
+  url.pathname = '/auth/login'
+  url.search = `redirect=${encodeURIComponent(request.nextUrl.pathname)}`
+  return NextResponse.redirect(url)
+}
+
 export async function middleware(request: NextRequest) {
-  console.log("[Middleware] URL demandée:", request.nextUrl.pathname);
-  
   // Vérifier si la route est publique
   if (publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
-    console.log("[Middleware] Route publique détectée");
     return NextResponse.next();
   }
 
   try {
     // Récupérer le token depuis les cookies
-    const tokenStr = request.cookies.get("token")?.value;
-    console.log("[Middleware] Token trouvé dans les cookies:", !!tokenStr);
+    const session = request.cookies.get('session')?.value;
     
-    if (!tokenStr) {
-      console.log("[Middleware] Pas de token, redirection vers login");
-      return handleUnauthorized(request);
+    if (!session) {
+      return redirectToLogin(request);
     }
 
-    const token = JSON.parse(tokenStr) as TokenData;
-    console.log("[Middleware] Role utilisateur:", token.user_role);
-    console.log("[Middleware] Token expires_at:", new Date(token.expires_at).toISOString());
+    const token = JSON.parse(session) as TokenData;
 
     // Vérifier si le token existe et si l'utilisateur est un ADMIN
     if (!token || token.user_role !== "ADMIN") {
-      console.log("[Middleware] Utilisateur non admin");
-      return handleUnauthorized(request);
+      return redirectToLogin(request);
     }
 
     // Vérifier si le token est expiré
-    if (Date.now() >= token.expires_at) {
-      // Pour les routes API, renvoyer une erreur 401
+    if (isTokenExpired(token)) {
       if (request.nextUrl.pathname.startsWith("/api")) {
         return NextResponse.json(
           { error: "Token expiré" },
           { status: 401 }
         );
       }
-      // Pour les routes frontend, rediriger vers la page de login
       return redirectToLogin(request);
     }
 
@@ -56,7 +54,6 @@ export async function middleware(request: NextRequest) {
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set("Authorization", `Bearer ${token.access_token}`);
       
-      // Ajouter le tenant_id si disponible
       if (token.tenant_id) {
         requestHeaders.set("X-Tenant-ID", token.tenant_id.toString());
       }
@@ -70,28 +67,21 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    return handleUnauthorized(request);
+    console.error('[Middleware] Erreur:', error);
+    return redirectToLogin(request);
   }
 }
 
-function handleUnauthorized(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/api")) {
-    return NextResponse.json(
-      { error: "Non autorisé" },
-      { status: 401 }
-    );
-  }
-  return redirectToLogin(request);
-}
-
-function redirectToLogin(request: NextRequest) {
-  const loginUrl = new URL("/auth/login", request.url);
-  loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
-  return NextResponse.redirect(loginUrl);
-}
-
+// Configurer sur quelles routes le middleware doit s'exécuter
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    /*
+     * Match all request paths except:
+     * 1. /api/auth/* (authentication routes)
+     * 2. /_next/* (Next.js internals)
+     * 3. /static/* (static files)
+     * 4. /*.* (files with extensions)
+     */
+    '/((?!api/auth|_next|static|[\\w-]+\\.\\w+).*)',
   ],
-}; 
+} 

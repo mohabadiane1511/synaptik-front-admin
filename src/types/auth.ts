@@ -1,13 +1,15 @@
-export enum UserRole {
-  SUPER_ADMIN = "SUPER_ADMIN",
-  ADMIN = "ADMIN",
-  USER = "USER"
-}
+import * as z from "zod";
+
+export type UserRole = "ADMIN" | "USER";
 
 export interface LoginRequest {
   email: string;
   password: string;
   tenant_slug: string;
+}
+
+export interface RefreshTokenRequest {
+  refresh_token: string;
 }
 
 export interface Token {
@@ -19,12 +21,8 @@ export interface Token {
   tenant_name?: string;
   tenant_slug?: string;
   user_id: number;
-  expires_in?: number; // Optionnel car ajouté côté client
-  refresh_token_expires_in?: number; // Optionnel car ajouté côté client
-}
-
-export interface RefreshTokenRequest {
-  refresh_token: string;
+  expires_in?: number;
+  refresh_token_expires_in?: number;
 }
 
 export interface AuthError {
@@ -33,6 +31,14 @@ export interface AuthError {
 }
 
 export interface TokenData extends Token {
-  expires_at: number; // timestamp d'expiration
-  refresh_token_expires_at: number; // timestamp d'expiration du refresh token
-} 
+  expires_at: number;
+  refresh_token_expires_at: number;
+}
+
+export const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  tenant_slug: z.string().min(1, "Le slug du tenant est requis"),
+});
+
+export type LoginForm = z.infer<typeof loginSchema>; 
