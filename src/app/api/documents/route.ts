@@ -11,7 +11,7 @@ export async function GET(request: Request) {
             }
         );
 
-        console.log("Route API - Réponse du backend:", response.data);
+       // console.log("Route API - Réponse du backend:", response.data);
 
         // S'assurer que la réponse est dans le bon format
         const formattedResponse = {
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
             total: Array.isArray(response.data) ? response.data.length : (response.data.total || 0)
         };
 
-        console.log("Route API - Réponse formatée:", formattedResponse);
+        //console.log("Route API - Réponse formatée:", formattedResponse);
 
         return NextResponse.json(formattedResponse);
     } catch (error: any) {

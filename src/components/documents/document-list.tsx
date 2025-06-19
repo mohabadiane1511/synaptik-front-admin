@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { DocumentResponse, DocumentListResponse, DocumentStatus } from "@/types/documents";
 import { documentsService } from "@/lib/documents";
 import { DocumentStatusBadge } from "@/components/ui/document-status-badge";
-import { useDocumentStatus } from "@/hooks/useDocumentStatus";
+import { useDocumentsPolling } from "@/hooks/useDocumentsPolling";
 import { parseISO, format, addHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { FileIcon, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
@@ -90,6 +90,9 @@ export function DocumentList({ onDocumentDeleted, onRefresh }: DocumentListProps
     useEffect(() => {
         loadDocuments();
     }, [loadDocuments]);
+
+    // Utiliser le hook de polling centralisé
+    const documentStatuses = useDocumentsPolling(allDocuments);
 
     const handleDelete = async (documentId: number) => {
         try {
@@ -183,6 +186,7 @@ export function DocumentList({ onDocumentDeleted, onRefresh }: DocumentListProps
                                 <DocumentRow
                                     key={document.id}
                                     document={document}
+                                    currentStatus={documentStatuses[document.id] || document.status}
                                     onDelete={handleDelete}
                                 />
                             ))}
@@ -244,13 +248,11 @@ export function DocumentList({ onDocumentDeleted, onRefresh }: DocumentListProps
 
 interface DocumentRowProps {
     document: DocumentResponse;
+    currentStatus: DocumentStatus;
     onDelete: (id: number) => void;
 }
 
-function DocumentRow({ document, onDelete }: DocumentRowProps) {
-    const { status } = useDocumentStatus(document.id);
-    const currentStatus = status || document.status;
-
+function DocumentRow({ document, currentStatus, onDelete }: DocumentRowProps) {
     // Formater la date en local
     const formatDate = (dateString: string) => {
         const date = parseISO(dateString);
